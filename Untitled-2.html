@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda de Perfumes Árabes</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Encabezado -->
+    <header class="bg-dark text-white text-center py-4">
+        <h1>Tienda de Perfumes Árabes</h1>
+        <p>Descubre fragancias </p>
+    </header>
+
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Perfumes Árabes</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="Untitled-1.html">Fragancias</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <main class="container my-5">
+        <div class="row">
+            <div class="col-md-8">
+                <h2>Fragancia Destacada</h2>
+                <img src="img/khamram.img" class="card-img-top" alt="Perfume Árabe 3">
+            </div>
+            <div class="col-md-4" id="gestion">
+                <h2>Gestión de Productos</h2>
+                <form id="product-form">
+                    <div class="form-group">
+                        <label for="product-name">Nombre del Producto</label>
+                        <input type="text" class="form-control" id="product-name" placeholder="Nombre del producto" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-price">Precio</label>
+                        <input type="number" class="form-control" id="product-price" placeholder="Precio" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-description">Descripción</label>
+                        <textarea class="form-control" id="product-description" rows="3" placeholder="Descripción del producto" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-category">Categoría</label>
+                        <select class="form-control" id="product-category">
+                            <option value="floral">Floral</option>
+                            <option value="especiado">Especiado</option>
+                            <option value="ambarino">Ámbar</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success">Dar de Alta</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteProduct()">Dar de Baja</button>
+                    <button type="button" class="btn btn-primary" onclick="generateReport()">Generar Informe</button>
+                    <button type="button" class="btn btn-warning" onclick="editProduct()">Modificar</button>
+                    <button type="button" class="btn btn-info" onclick="viewProducts()">Consultar</button>
+                </form>
+
+                <!-- Listado de productos -->
+                <h3 class="mt-5">Productos Registrados</h3>
+                <ul class="list-group" id="product-list">
+                    <!-- Los productos se añadirán aquí con JavaScript -->
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- Pie de página -->
+    <footer class="bg-dark text-white text-center py-4">
+        <p>&copy; 2024 Tienda de Perfumes Árabes. Edgar Figueroa.</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Lógica JavaScript -->
+    <script>
+        // Cargar productos desde localStorage al cargar la página
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+
+        // Función para agregar un producto
+        document.getElementById('product-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('product-name').value;
+            const price = document.getElementById('product-price').value;
+            const description = document.getElementById('product-description').value;
+            const category = document.getElementById('product-category').value;
+
+            const product = {
+                name,
+                price,
+                description,
+                category,
+                id: Date.now()
+            };
+
+            products.push(product);
+            localStorage.setItem('products', JSON.stringify(products)); // Guardar en localStorage
+            updateProductList();
+            this.reset();
+        });
+
+        // Función para eliminar un producto
+        function deleteProduct() {
+            const name = document.getElementById('product-name').value;
+            // Verificar si el producto existe
+            const productIndex = products.findIndex(product => product.name === name);
+            if (productIndex !== -1) {
+                products.splice(productIndex, 1); // Eliminar el producto
+                localStorage.setItem('products', JSON.stringify(products)); // Guardar cambios en localStorage
+                alert('Producto eliminado exitosamente');
+            } else {
+                alert('El producto no existe');
+            }
+            updateProductList();
+        }
+
+        // Función para modificar un producto
+        function editProduct() {
+            const name = document.getElementById('product-name').value;
+            const product = products.find(product => product.name === name);
+            if (product) {
+                product.price = document.getElementById('product-price').value;
+                product.description = document.getElementById('product-description').value;
+                product.category = document.getElementById('product-category').value;
+                localStorage.setItem('products', JSON.stringify(products)); // Guardar cambios en localStorage
+                alert('Producto modificado exitosamente');
+                updateProductList();
+            } else {
+                alert('El producto no existe');
+            }
+        }
+
+        // Función para consultar productos
+        function viewProducts() {
+            updateProductList();
+        }
+
+        // Función para actualizar el listado de productos
+        function updateProductList() {
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = ''; // Limpiar la lista
+            if (products.length === 0) {
+                productList.innerHTML = '<li class="list-group-item">No hay productos registrados.</li>';
+            } else {
+                products.forEach(product => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item';
+                    li.textContent = `${product.name} - ${product.category} - $${product.price}`;
+                    productList.appendChild(li);
+                });
+            }
+        }
+
+        // Función para generar un informe
+        function generateReport() {
+            if (products.length > 0) {
+                alert('Informe generado: ' + JSON.stringify(products, null, 2));
+            } else {
+                alert('No hay productos para generar el informe');
+            }
+        }
+
+        // Cargar la lista de productos al inicio
+        updateProductList();
+    </script>
+</body>
+</html>
+
